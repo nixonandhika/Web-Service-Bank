@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - NasabahService",
+            "request": "launch",
+            "mainClass": "com.nasabah.service.NasabahService",
+            "projectName": "ws-bank"
+        }
+    ]
+}
