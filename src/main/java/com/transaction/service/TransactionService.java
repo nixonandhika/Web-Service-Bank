@@ -42,7 +42,7 @@ public class TransactionService {
 
                     String query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES ('" + 
                     srcAcc.getAccount() + "', 'debit'," + amount.toString() + ", '" + destAcc.getAccount() + 
-                    "', CURRENT_TIME);";
+                    "', CURRENT_TIMESTAMP);";
 
                     stmt.executeQuery(query1);
 
@@ -67,7 +67,7 @@ public class TransactionService {
 
                     String query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES ('" + 
                     destAcc.getAccount() + "', 'credit'," + amount.toString() + ", '" + srcAcc.getAccount() + 
-                    "', CURRENT_TIME);";
+                    "', CURRENT_TIMESTAMP);";
 
                     stmt.executeQuery(query1);
 
