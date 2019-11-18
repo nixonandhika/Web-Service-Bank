@@ -4,102 +4,121 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
 import com.account.domain.Account;
 import com.account.service.AccountService;
+import com.transaction.domain.Transaction;
 
 @WebService()
 public class TransactionService {
     @WebMethod
-    public void transfer(String acc, String target, Integer amount) {
+    public Integer transfer(String src, String dest, Integer amount) {
         AccountService accService = new AccountService();
-        Account sourceAcc = accService.getAccountByNum(acc);
-        Account targetAcc = new Account();
+        Account srcAcc = accService.getAccountByNum(src);
+        Account destAcc = new Account();
         
         //Check target account validity
-        if (target.length() <= 10) {
-            targetAcc = accService.getAccountByNum(target);
+        if (dest.length() <= 10) {
+            destAcc = accService.getAccountByNum(dest);
         } else {
             //get account number
             String accNum = "";
-            targetAcc = accService.getAccountByNum(accNum);
+            destAcc = accService.getAccountByNum(accNum);
         }
-        if (sourceAcc.getAccount() != "") {
+        
+        if (srcAcc.getAccount() != "") {
             //Check balance
-            if (sourceAcc.getBalance() >= amount) {
+            if (srcAcc.getBalance() >= amount) {
                 //Debit
                 try {
                     //Insert debit transaction in transaction table
-                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String currentTime = df.format(new Date());
                     Class.forName("org.mariadb.jdbc.Driver").newInstance();
                     Connection conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bank_db", "root", "");
                     Statement stmt = conn.createStatement();
-                    String query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES (" + 
-                    sourceAcc.getAccount() + ", 'debit'," + amount.toString() + ", " + targetAcc.getAccount() + ", CURRENT_TIME);";
-                    ResultSet res1 = stmt.executeQuery(query1);
+
+                    String query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES ('" + 
+                    srcAcc.getAccount() + "', 'debit'," + amount.toString() + ", '" + destAcc.getAccount() + 
+                    "', CURRENT_TIME);";
+
+                    stmt.executeQuery(query1);
 
                     //Update balance in source account table
-                    Integer newBalance = sourceAcc.getBalance() - amount;
-                    String query2 = "UPDATE account SET balance" + newBalance.toString() + "WHERE account=" + sourceAcc.getAccount() + ";";
-                    ResultSet res2 = stmt.executeQuery(query2);
+                    Integer newBalance = srcAcc.getBalance() - amount;
+
+                    String query2 = "UPDATE account SET balance=" + newBalance.toString() + " WHERE account='" + 
+                    srcAcc.getAccount() + "';";
+                    stmt.executeQuery(query2);
+
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
+                    return 402; //Debit input failed
                 }
 
-                //Credit
+                // Credit
                 try {
                     //Insert credit transaction in transaction table
-                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String currentTime = df.format(new Date());
                     Class.forName("org.mariadb.jdbc.Driver").newInstance();
                     Connection conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bank_db", "root", "");
                     Statement stmt = conn.createStatement();
-                    String query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES (" + 
-                    targetAcc.getAccount() + ", 'debit'," + amount.toString() + ", " + sourceAcc.getAccount() + ", CURRENT_TIME);";
-                    ResultSet res1 = stmt.executeQuery(query1);
+
+                    String query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES ('" + 
+                    destAcc.getAccount() + "', 'credit'," + amount.toString() + ", '" + srcAcc.getAccount() + 
+                    "', CURRENT_TIME);";
+
+                    stmt.executeQuery(query1);
 
                     //Update balance in target account table
-                    Integer newBalance = targetAcc.getBalance() + amount;
-                    String query2 = "UPDATE account SET balance" + newBalance.toString() + "WHERE account=" + targetAcc.getAccount();
-                    ResultSet res2 = stmt.executeQuery(query2);
+                    Integer newBalance = destAcc.getBalance() + amount;
+
+                    String query2 = "UPDATE account SET balance=" + newBalance.toString() + " WHERE account='" + 
+                    destAcc.getAccount() + "';";
+
+                    stmt.executeQuery(query2);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
+                    return 403; //Credit input failed
                 }
+
+                return 200;
+            } else {
+                return 401; //Balance not enough
             }
+        } else {
+            return 400; //Account number not valid
         }
     }
 
     @WebMethod
-    public boolean checkCredit(String acc, Integer amount, Integer time) {
+    public boolean checkCredit(String src, String dest, Integer amount, Integer time) {
         AccountService accService = new AccountService();
         boolean exist = false;
-        Account accChecked = new Account();
+        Account srcAcc = accService.getAccountByNum(src);
+        Account destAcc = new Account();
         
         //Check target account validity
-        if (acc.length() <= 10) {
-            accChecked = accService.getAccountByNum(acc);
+        if (dest.length() <= 10) {
+            destAcc = accService.getAccountByNum(dest);
         } else {
-            //get account number
+            //get account number from virtual account
             String accNum = "";
-            accChecked = accService.getAccountByNum(accNum);
+            destAcc = accService.getAccountByNum(accNum);
         }
 
-        if (accChecked.getAccount() != "") {
+        if (srcAcc.getAccount() != "" && destAcc.getAccount() != "") {
             try {
                 Integer timeInSeconds = time * 60;
                 Class.forName("org.mariadb.jdbc.Driver").newInstance();
                 Connection conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bank_db", "root", "");
                 Statement stmt = conn.createStatement();
 
-                String query = "SELECT account, type, amount FROM transactions WHERE account=" + accChecked.getAccount() + 
-                " AND type='credit' AND EXTRACT(second FROM (CURRENT_TIME-time)) < " + timeInSeconds.toString() +  ";";
+                String query = "SELECT destination, type, amount, time FROM transactions WHERE account='" + 
+                destAcc.getAccount() + "' AND amount=" + amount + " AND destination='" + srcAcc.getAccount() + 
+                "' AND type='credit' AND TIME_TO_SEC(TIMEDIFF(CURRENT_TIMESTAMP, time)) < " + 
+                timeInSeconds.toString() +  ";";
 
                 ResultSet res = stmt.executeQuery(query);
 
@@ -112,6 +131,37 @@ public class TransactionService {
             }
         }
         return exist;
+    }
+
+    @WebMethod
+    public ArrayList<Transaction> getHistory(String acc) {
+        ArrayList<Transaction> hist = new ArrayList<Transaction>();
+        AccountService accService = new AccountService();
+        Account currAcc = accService.getAccountByNum(acc);
+        try {
+            Class.forName("org.mariadb.jdbc.Driver").newInstance();
+            Connection conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bank_db", "root", "");
+            Statement stmt = conn.createStatement();
+
+            String query = "SELECT type, amount, destination, time FROM transactions WHERE account='" + 
+            currAcc.getAccount() + "';";
+
+            ResultSet res = stmt.executeQuery(query);
+
+            while (res.next()) {
+                Transaction tr = new Transaction();
+                tr.setAccount(currAcc.getAccount());
+                tr.setType(res.getString("type"));
+                tr.setAmount(res.getInt("amount"));
+                tr.setDestination(res.getString("destination"));
+                tr.setStatus(200);
+                hist.add(tr);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return hist;
     }
 
 	public static void main(String[] argv) {

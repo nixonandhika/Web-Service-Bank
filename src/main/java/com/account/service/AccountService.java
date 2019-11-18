@@ -19,7 +19,7 @@ public class AccountService {
             Class.forName("org.mariadb.jdbc.Driver").newInstance();
             Connection conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bank_db", "root", "");
             Statement stmt = conn.createStatement();
-            String query = "SELECT * FROM account WHERE account.account=" + accNum + ";";
+            String query = "SELECT * FROM account WHERE account.account=" + accNum + " LIMIT 1;";
             ResultSet res = stmt.executeQuery(query);
 
             if (res.next()) {
