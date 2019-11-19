@@ -17,7 +17,7 @@ public class AccountService {
         Account acc = new Account();
         try {
             Class.forName("org.mariadb.jdbc.Driver").newInstance();
-            Connection conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bank_db", "root", "");
+            Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/bank_db", "root", "");
             Statement stmt = conn.createStatement();
             String query = "SELECT * FROM account WHERE account.account=" + accNum + " LIMIT 1;";
             ResultSet res = stmt.executeQuery(query);
@@ -43,7 +43,7 @@ public class AccountService {
 
     public static void main(String[] argv) {
         Object implementor = new AccountService ();
-        String address = "http://localhost:9000/ws_bank_war_exploded/AccountService";
+        String address = "http://127.0.0.1:8080/ws_bank_war_exploded/AccountService";
         Endpoint.publish(address, implementor);
     }
 

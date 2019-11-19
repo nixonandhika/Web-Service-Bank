@@ -37,7 +37,7 @@ public class TransactionService {
                 try {
                     //Insert debit transaction in transaction table
                     Class.forName("org.mariadb.jdbc.Driver").newInstance();
-                    Connection conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bank_db", "root", "");
+                    Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/bank_db", "root", "");
                     Statement stmt = conn.createStatement();
 
                     String query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES ('" + 
@@ -62,7 +62,7 @@ public class TransactionService {
                 try {
                     //Insert credit transaction in transaction table
                     Class.forName("org.mariadb.jdbc.Driver").newInstance();
-                    Connection conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bank_db", "root", "");
+                    Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/bank_db", "root", "");
                     Statement stmt = conn.createStatement();
 
                     String query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES ('" + 
@@ -112,7 +112,7 @@ public class TransactionService {
             try {
                 Integer timeInSeconds = time * 60;
                 Class.forName("org.mariadb.jdbc.Driver").newInstance();
-                Connection conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bank_db", "root", "");
+                Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/bank_db", "root", "");
                 Statement stmt = conn.createStatement();
 
                 String query = "SELECT destination, type, amount, time FROM transactions WHERE account='" + 
@@ -140,7 +140,7 @@ public class TransactionService {
         Account currAcc = accService.getAccountByNum(acc);
         try {
             Class.forName("org.mariadb.jdbc.Driver").newInstance();
-            Connection conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bank_db", "root", "");
+            Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/bank_db", "root", "");
             Statement stmt = conn.createStatement();
 
             String query = "SELECT type, amount, destination, time FROM transactions WHERE account='" + 
@@ -166,7 +166,7 @@ public class TransactionService {
 
 	public static void main(String[] argv) {
         Object implementor = new TransactionService ();
-        String address = "http://localhost:9000/ws_bank_war_exploded/TransactionService";
+        String address = "http://127.0.0.1:8080/ws_bank_war_exploded/TransactionService";
         Endpoint.publish(address, implementor);
     }
 
