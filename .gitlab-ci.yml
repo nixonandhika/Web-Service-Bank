@@ -1,0 +1,39 @@
+# cache:
+#   untracked: true
+#   key: "$CI_BUILD_REF_NAME"
+#   paths:
+#     - node_modules/
+    
+stages:
+  # - lint
+  # - test
+  - deploy
+
+
+# lint:
+#   stage: lint
+#   script:
+#     - echo "install"
+#     - npm install
+#     - echo "run lint"
+#     - npm run lint
+
+# test:
+#   stage: test
+#   script:
+#     - echo "test"
+#     - CI=true npm test
+    
+deploy:
+  stage: deploy
+  only:
+  - master
+  - dev
+  script:
+    - cd ~
+    - rm -rf ws-bank/
+    - git clone git@gitlab.informatika.org:if3110-2019-02-k02-12/ws-bank.git
+    - cd ws-bank/
+    - mvn package 
+    - sudo cp -r target/ws-bank-1.0-SNAPSHOT.war /opt/tomcat/latest/webapps/
+    - sudo cp -r target/ws-bank-1.0-SNAPSHOT/ /opt/tomcat/latest/webapps/
