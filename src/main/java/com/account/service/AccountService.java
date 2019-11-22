@@ -1,9 +1,12 @@
 package com.account.service;
 
+import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Random;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
@@ -37,8 +40,20 @@ public class AccountService {
     }
 
     @WebMethod
-    public String makeVirtualAccount(String accNum, int movieId) {
-        return "";
+    public String makeVirtualAccount(String accNum) {
+        String NUMBER = "0123456789";
+        int length = 16;
+        StringBuilder sb = new StringBuilder(length);
+        SecureRandom random = new SecureRandom();
+        sb.append(accNum);
+        
+        for (int i = 0; i < length; i++) {
+            int rnd = random.nextInt(NUMBER.length());
+            char rndChar = NUMBER.charAt(rnd);
+
+            sb.append(rndChar);
+        }
+        return sb.toString();
     }
 
     public static void main(String[] argv) {
