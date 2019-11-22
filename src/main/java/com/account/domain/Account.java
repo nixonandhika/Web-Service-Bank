@@ -8,7 +8,6 @@ import javax.xml.bind.annotation.*;
         "account",
         "name",
         "balance",
-        "va",
         "status"
 })
 
@@ -21,8 +20,6 @@ public class Account {
     private String name;
     @XmlElement(name = "balance", required = true)
     private int balance;
-    @XmlElement(name = "va", required = true)
-    private String va;
     @XmlElement(name = "status", required = true)
     private int status = 0;
 
@@ -30,14 +27,12 @@ public class Account {
         this.account = "";
         this.name = "";
         this.balance = 0;
-        this.va = "";
     }
 
-    public Account(String account, String name, int balance, String va) {
+    public Account(String account, String name, int balance) {
         this.account = account;
         this.name = name;
         this.balance = balance;
-        this.va = va;
     }
 
     public String getAccount() {
@@ -62,14 +57,6 @@ public class Account {
 
     public void setNum(int balance) {
         this.balance = balance;
-    }
-
-    public String getVa() {
-        return va;
-    }
-
-    public void setVa(String va) {
-        this.va = va;
     }
 
     public int getStatus() {

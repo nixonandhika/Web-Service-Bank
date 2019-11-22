@@ -1,12 +1,10 @@
 package com.account.service;
 
-import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Random;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
@@ -15,6 +13,25 @@ import com.account.domain.Account;
 
 @WebService()
 public class AccountService {
+    @WebMethod
+    public String getAccountNumById(Integer userId) {
+        String accNum = "";
+        try {
+            Class.forName("org.mariadb.jdbc.Driver").newInstance();
+            Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/engi_cinema", "root", "");
+            Statement stmt = conn.createStatement();
+            String query = "SELECT bank_account FROM users WHERE userId=" + userId + " LIMIT 1;";
+            ResultSet res = stmt.executeQuery(query);
+
+            if (res.next()) {
+                return res.getString("bank_account");
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return accNum;
+    }
+
     @WebMethod
     public Account getAccountByNum(String accNum) {
         Account acc = new Account();
