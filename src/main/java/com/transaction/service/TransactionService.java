@@ -115,7 +115,7 @@ public class TransactionService {
                 Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/bank_db", "root", "");
                 Statement stmt = conn.createStatement();
 
-                String query = "SELECT destination, type, amount, time FROM transactions WHERE account='" + 
+                String query = "SELECT * FROM transactions WHERE account='" + 
                 destAcc.getAccount() + "' AND amount=" + amount + " AND destination='" + srcAcc.getAccount() + 
                 "' AND type='credit' AND TIME_TO_SEC(TIMEDIFF(CURRENT_TIMESTAMP, time)) < " + 
                 timeInSeconds.toString() +  ";";
@@ -154,6 +154,7 @@ public class TransactionService {
                 tr.setType(res.getString("type"));
                 tr.setAmount(res.getInt("amount"));
                 tr.setDestination(res.getString("destination"));
+                tr.setTime(res.getString("time"));
                 tr.setStatus(200);
                 hist.add(tr);
             }

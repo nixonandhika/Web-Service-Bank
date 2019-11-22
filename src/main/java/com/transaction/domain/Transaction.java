@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.*;
         "type",
         "amount",
         "destination",
+        "time",
         "status"
 })
 
@@ -23,6 +24,8 @@ public class Transaction {
     private int amount;
     @XmlElement(name = "destination", required = true)
     private String destination;
+    @XmlElement(name = "time", required = true)
+    private String time;
     @XmlElement(name = "status", required = true)
     private int status = 0;
 
@@ -31,13 +34,15 @@ public class Transaction {
         this.type = "";
         this.amount = 0;
         this.destination = "";
+        this.time = "";
     }
 
-    public Transaction(String account, String type, int amount, String destination) {
+    public Transaction(String account, String type, int amount, String destination, String time) {
         this.account = account;
         this.type = type;
         this.amount = amount;
         this.destination = destination;
+        this.time = time;
     }
 
     public String getAccount() {
@@ -70,6 +75,14 @@ public class Transaction {
 
     public void setDestination(String destination) {
         this.destination = destination;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 
     public int getStatus() {
