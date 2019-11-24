@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 18, 2019 at 03:03 PM
+-- Generation Time: Nov 24, 2019 at 09:51 AM
 -- Server version: 10.1.38-MariaDB
 -- PHP Version: 7.3.4
 
@@ -39,8 +39,9 @@ CREATE TABLE `account` (
 --
 
 INSERT INTO `account` (`account`, `name`, `balance`) VALUES
-('7770000001', 'Engima', 1000000000),
-('7775162480', 'Test Account', 10000000);
+('7770000001', 'Engima', 999640000),
+('7775162480', 'Test Account', 9905000),
+('7777524615', 'test', 955000);
 
 -- --------------------------------------------------------
 
@@ -49,20 +50,13 @@ INSERT INTO `account` (`account`, `name`, `balance`) VALUES
 --
 
 CREATE TABLE `transactions` (
+  `id` int(11) NOT NULL,
   `account` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `type` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `amount` int(50) NOT NULL,
   `destination` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `time` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Dumping data for table `transactions`
---
-
-INSERT INTO `transactions` (`account`, `type`, `amount`, `destination`, `time`) VALUES
-('7775162480', 'debit', 100000, '7770000001', '2019-11-18 08:00:00'),
-('7770000001', 'credit', 100000, '7775162480', '2019-11-18 08:00:00');
 
 -- --------------------------------------------------------
 
@@ -89,6 +83,7 @@ ALTER TABLE `account`
 -- Indexes for table `transactions`
 --
 ALTER TABLE `transactions`
+  ADD PRIMARY KEY (`id`),
   ADD KEY `account` (`account`),
   ADD KEY `destination` (`destination`);
 
@@ -96,7 +91,18 @@ ALTER TABLE `transactions`
 -- Indexes for table `virtual_account`
 --
 ALTER TABLE `virtual_account`
+  ADD PRIMARY KEY (`virtual_account`),
   ADD KEY `account` (`account`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `transactions`
+--
+ALTER TABLE `transactions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- Constraints for dumped tables
@@ -106,8 +112,7 @@ ALTER TABLE `virtual_account`
 -- Constraints for table `transactions`
 --
 ALTER TABLE `transactions`
-  ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`account`) REFERENCES `account` (`account`),
-  ADD CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`destination`) REFERENCES `account` (`account`);
+  ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`account`) REFERENCES `account` (`account`);
 
 --
 -- Constraints for table `virtual_account`
