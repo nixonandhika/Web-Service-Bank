@@ -105,7 +105,7 @@ public class TransactionService {
     }
 
     @WebMethod
-    public boolean checkCredit(String src, String dest, Integer amount, Integer time) {
+    public boolean checkVirtualDebit(String src, String dest, Integer amount, Integer time) {
         AccountService accService = new AccountService();
         boolean exist = false;
         Account srcAcc = accService.getAccountByNum(src);
@@ -127,10 +127,10 @@ public class TransactionService {
                 Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/bank_db", "root", "");
                 Statement stmt = conn.createStatement();
 
-                String query = "SELECT * FROM transactions WHERE account='" + 
-                destAcc.getAccount() + "' AND amount>=" + amount + " AND destination='" + srcAcc.getAccount() + 
-                "' AND type='credit' AND TIME_TO_SEC(TIMEDIFF(CURRENT_TIMESTAMP, time)) < " + 
-                timeInSeconds.toString() +  ";";
+                String query = "SELECT * FROM transactions JOIN virtual_account USING (account) WHERE transactions.account='" + 
+                srcAcc.getAccount() + "' AND amount>=" + amount + " AND destination='" + dest + 
+                "' AND type='debit' AND TIME_TO_SEC(TIMEDIFF(CURRENT_TIMESTAMP, time)) < " + 
+                timeInSeconds.toString() +  " AND virtual_account='" + dest + "';";
 
                 ResultSet res = stmt.executeQuery(query);
 
@@ -140,6 +140,74 @@ public class TransactionService {
 
             } catch (Exception e) {
                 System.out.println(e.getMessage());
+            }
+        }
+        return exist;
+    }
+    
+    @WebMethod
+    public boolean checkCredit(String src, String dest, Integer amount, Integer time) {
+        AccountService accService = new AccountService();
+        boolean exist = false;
+        Account srcAcc = accService.getAccountByNum(src);
+        Account destAcc = new Account();
+        
+        //Check target account validity
+        if (dest.length() <= 10) {
+            destAcc = accService.getAccountByNum(dest);
+        } else {
+            //get Engima account number
+            String accNum = "7770000001";
+            destAcc = accService.getAccountByNum(accNum);
+        }
+
+        if (srcAcc.getAccount() != "" && destAcc.getAccount() != "") {
+            if (dest.length() > 10) {
+                if (checkVirtualDebit(src, dest, amount, time)) {
+                    try {
+                        Integer timeInSeconds = time * 60;
+                        Class.forName("org.mariadb.jdbc.Driver").newInstance();
+                        Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/bank_db", "root", "");
+                        Statement stmt = conn.createStatement();
+        
+                        String query = "SELECT * FROM transactions WHERE account='" + 
+                        destAcc.getAccount() + "' AND amount>=" + amount + " AND destination='" + srcAcc.getAccount() + 
+                        "' AND type='credit' AND TIME_TO_SEC(TIMEDIFF(CURRENT_TIMESTAMP, time)) < " + 
+                        timeInSeconds.toString() +  ";";
+        
+                        ResultSet res = stmt.executeQuery(query);
+        
+                        if (res.next()) {
+                            exist = true;
+                        }
+        
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                try {
+                    Integer timeInSeconds = time * 60;
+                    Class.forName("org.mariadb.jdbc.Driver").newInstance();
+                    Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/bank_db", "root", "");
+                    Statement stmt = conn.createStatement();
+    
+                    String query = "SELECT * FROM transactions WHERE account='" + 
+                    destAcc.getAccount() + "' AND amount>=" + amount + " AND destination='" + srcAcc.getAccount() + 
+                    "' AND type='credit' AND TIME_TO_SEC(TIMEDIFF(CURRENT_TIMESTAMP, time)) < " + 
+                    timeInSeconds.toString() +  ";";
+    
+                    ResultSet res = stmt.executeQuery(query);
+    
+                    if (res.next()) {
+                        exist = true;
+                    }
+    
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
             }
         }
         return exist;
