@@ -17,6 +17,10 @@ import com.transaction.domain.Transaction;
 public class TransactionService {
     @WebMethod
     public Integer transfer(String src, String dest, Integer amount) {
+        if (src == dest || amount <= 0) {
+            return 400;
+        }
+        
         AccountService accService = new AccountService();
         Account srcAcc = accService.getAccountByNum(src);
         Account destAcc = new Account();
@@ -26,11 +30,11 @@ public class TransactionService {
             destAcc = accService.getAccountByNum(dest);
         } else {
             //get account number
-            String accNum = "";
+            String accNum = "7770000001"; //Engima account number
             destAcc = accService.getAccountByNum(accNum);
         }
         
-        if (srcAcc.getAccount() != "") {
+        if (destAcc.getAccount() != "") {
             //Check balance
             if (srcAcc.getBalance() >= amount) {
                 //Debit
@@ -40,9 +44,17 @@ public class TransactionService {
                     Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/bank_db", "root", "");
                     Statement stmt = conn.createStatement();
 
-                    String query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES ('" + 
-                    srcAcc.getAccount() + "', 'debit'," + amount.toString() + ", '" + destAcc.getAccount() + 
-                    "', CURRENT_TIMESTAMP);";
+                    String query1 = "";
+
+                    if (dest.length() <= 10) {
+                        query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES ('" + 
+                                    srcAcc.getAccount() + "', 'debit', " + amount.toString() + ", '" + destAcc.getAccount() + 
+                                    "', CURRENT_TIMESTAMP);";
+                    } else {
+                        query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES ('" + 
+                                    srcAcc.getAccount() + "', 'debit', " + amount.toString() + ", '" + dest + 
+                                    "', CURRENT_TIMESTAMP);";
+                    }
 
                     stmt.executeQuery(query1);
 
@@ -66,7 +78,7 @@ public class TransactionService {
                     Statement stmt = conn.createStatement();
 
                     String query1 = "INSERT INTO transactions (account, type, amount, destination, time) VALUES ('" + 
-                    destAcc.getAccount() + "', 'credit'," + amount.toString() + ", '" + srcAcc.getAccount() + 
+                    destAcc.getAccount() + "', 'credit', " + amount.toString() + ", '" + srcAcc.getAccount() + 
                     "', CURRENT_TIMESTAMP);";
 
                     stmt.executeQuery(query1);
@@ -103,8 +115,8 @@ public class TransactionService {
         if (dest.length() <= 10) {
             destAcc = accService.getAccountByNum(dest);
         } else {
-            //get account number from virtual account
-            String accNum = "";
+            //get Engima account number
+            String accNum = "7770000001";
             destAcc = accService.getAccountByNum(accNum);
         }
 
@@ -116,7 +128,7 @@ public class TransactionService {
                 Statement stmt = conn.createStatement();
 
                 String query = "SELECT * FROM transactions WHERE account='" + 
-                destAcc.getAccount() + "' AND amount=" + amount + " AND destination='" + srcAcc.getAccount() + 
+                destAcc.getAccount() + "' AND amount>=" + amount + " AND destination='" + srcAcc.getAccount() + 
                 "' AND type='credit' AND TIME_TO_SEC(TIMEDIFF(CURRENT_TIMESTAMP, time)) < " + 
                 timeInSeconds.toString() +  ";";
 

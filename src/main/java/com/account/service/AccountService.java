@@ -14,25 +14,6 @@ import com.account.domain.Account;
 @WebService()
 public class AccountService {
     @WebMethod
-    public String getAccountNumById(Integer userId) {
-        String accNum = "";
-        try {
-            Class.forName("org.mariadb.jdbc.Driver").newInstance();
-            Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/engi_cinema", "root", "");
-            Statement stmt = conn.createStatement();
-            String query = "SELECT bank_account FROM users WHERE userId=" + userId + " LIMIT 1;";
-            ResultSet res = stmt.executeQuery(query);
-
-            if (res.next()) {
-                return res.getString("bank_account");
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        return accNum;
-    }
-
-    @WebMethod
     public Account getAccountByNum(String accNum) {
         Account acc = new Account();
         try {
@@ -59,7 +40,7 @@ public class AccountService {
     @WebMethod
     public String makeVirtualAccount(String accNum) {
         String NUMBER = "0123456789";
-        int length = 16;
+        int length = 6;
         StringBuilder sb = new StringBuilder(length);
         SecureRandom random = new SecureRandom();
         sb.append(accNum);
@@ -70,7 +51,22 @@ public class AccountService {
 
             sb.append(rndChar);
         }
-        return sb.toString();
+
+        String va = sb.toString();
+
+        try {
+            Class.forName("org.mariadb.jdbc.Driver").newInstance();
+            Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/bank_db", "root", "");
+            Statement stmt = conn.createStatement();
+            String query = "INSERT INTO virtual_account(virtual_account.account, virtual_account.virtual_account) VALUES (" + 
+            accNum + ", " + va + ")";
+            stmt.executeQuery(query);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return "";
+        }
+
+        return va;
     }
 
     public static void main(String[] argv) {
