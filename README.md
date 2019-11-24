@@ -15,3 +15,17 @@
 #### Mengecek ada atau tidak sebuah transaksi kredit dalam suatu rentang waktu. Input yang diterima adalah nomor rekening atau akun virtual tujuan, jumlah nominal yang diharapkan
 
 ## Basis Data yang Digunakan: MySQL
+
+
+</br>
+
+## Pembagian Tugas DPPL
+1. CI/CD: 13517089
+2. Eksplorasi dan setup mesin deployment: 13517059, 13517069, 13517134
+
+</br>
+
+## URL Deployment
+Halaman Engima: 54.163.161.180/engima
+
+Halaman Bank Pro: 54.163.161.180:5000
