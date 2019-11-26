@@ -30,5 +30,7 @@ Halaman Engima: 100.26.106.0/engima
 Halaman Bank Pro: 100.26.106.0:5000
 
 URL WS Bank: 
+<br>
 100.26.106.0:8080/ws-bank-1.0-SNAPSHOT/services/AccountService
+<br>
 100.26.106.0:8080/ws-bank-1.0-SNAPSHOT/services/TransactionService
